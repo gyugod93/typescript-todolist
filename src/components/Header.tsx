@@ -1,43 +1,46 @@
-import React from "react";
-import { TodoType } from "..";
+import React, { useState } from "react";
 import styled from "styled-components";
+import { useDispatch } from "react-redux";
+import { TodoType } from "../types/types";
+import { v4 as uuidv4 } from "uuid";
+import { addTodos } from "../redux/modules/todosSlice";
 
-type HeaderProps = {
-  title: string;
-  //React.Dispatch - 상태를 변경하는데 사용
-  //React.SetStateAction<string> - setState 함수의 인자로 사용될 수 있는 값의 타입
-  //즉 상태를 어떻게 업데이트할지 정의
-  setTitle: React.Dispatch<React.SetStateAction<string>>;
-  content: string;
-  setContent: React.Dispatch<React.SetStateAction<string>>;
-  todos: TodoType[];
-  addTodoHandler: (e: React.FormEvent<HTMLFormElement>) => void;
-};
+function Header() {
+  const dispatch = useDispatch();
+  const uuid = uuidv4();
+  const [title, setTitle] = useState<string>("");
+  const [content, setContent] = useState<string>("");
 
-function Header({
-  title,
-  setTitle,
-  content,
-  setContent,
-  todos,
-  addTodoHandler,
-}: HeaderProps) {
+  const addTodoHandler = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const newTodo: TodoType = {
+      id: uuid,
+      title,
+      content,
+      isDone: false,
+    };
+
+    dispatch(addTodos(newTodo));
+    setTitle("");
+    setContent("");
+  };
   return (
     <div>
       <StH1>My Todo List</StH1>
-      <StForm onSubmit={addTodoHandler}>
+      <StForm onSubmit={(e) => addTodoHandler(e)}>
         <StInput>
-          <label htmlFor="titleInput">제목 :</label>
+          <label>제목 :</label>
           <input
+            id="title"
             type="text"
-            id="titleInput"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
-          <label htmlFor="contentInput">내용 :</label>
+          <label>내용 :</label>
           <input
+            id="content"
             type="text"
-            id="contentInput"
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
@@ -47,16 +50,6 @@ function Header({
     </div>
   );
 }
-
-//FC로 적용하는 방식도 기억해두기
-// const Header: React.FC<HeaderProps> = ({
-//   title,
-//   content,
-//   todos,
-//   addTodoHandler,
-// }) => {
-
-// };
 
 const StH1 = styled.h1`
   background-color: beige;
