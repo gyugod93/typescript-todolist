@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { TodoType } from "../types/types";
 import { v4 as uuidv4 } from "uuid";
 import { addTodos } from "../redux/modules/todosSlice";
+import jsonServerAPI from "../api/api";
 
 function Header() {
   const dispatch = useDispatch();
@@ -11,7 +12,7 @@ function Header() {
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
 
-  const addTodoHandler = (e: React.FormEvent<HTMLFormElement>) => {
+  const addTodoHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const newTodo: TodoType = {
@@ -20,10 +21,14 @@ function Header() {
       content,
       isDone: false,
     };
-
-    dispatch(addTodos(newTodo));
-    setTitle("");
-    setContent("");
+    try {
+      await jsonServerAPI.post(`/todos`, newTodo);
+      dispatch(addTodos(newTodo));
+      setTitle("");
+      setContent("");
+    } catch (error) {
+      console.log("error", error);
+    }
   };
   return (
     <div>
