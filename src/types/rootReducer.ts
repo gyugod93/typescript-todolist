@@ -6,8 +6,4 @@ const rootReducer = combineReducers({
   todos: todoReducer,
 });
 
-export type RootState = {
-  todos: TodosState;
-};
-
 export default rootReducer;

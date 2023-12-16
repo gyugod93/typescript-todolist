@@ -4,10 +4,10 @@ import { useDispatch } from "react-redux";
 import { TodoType } from "../types/types";
 import { v4 as uuidv4 } from "uuid";
 import { __addTodos, __getTodos } from "../redux/modules/todosSlice";
-import store from "../redux/config/rootStore";
+import { useAppDispatch } from "../redux/hooks/hooks";
 
 function Header() {
-  const dispatch = useDispatch<typeof store.dispatch>();
+  const dispatch = useAppDispatch();
   const uuid = uuidv4();
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");

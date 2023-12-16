@@ -24,6 +24,10 @@ export type TodosState = {
   error: Error | null;
 };
 
+export type RootState = {
+  todos: TodosState;
+};
+
 export type TodosAction =
   | PayloadAction<AddTodoPayload>
   | PayloadAction<DeleteTodoPayload>

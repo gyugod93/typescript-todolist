@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
-import { RootState } from "../types/rootReducer";
 import jsonServerAPI from "../api/api";
-import store from "../redux/config/rootStore";
 import { __changeTodo, __deleteTodo } from "../redux/modules/todosSlice";
+import { RootState } from "../types/types";
+import { useAppDispatch } from "../redux/hooks/hooks";
 
 const Main = () => {
-  const dispatch = useDispatch<typeof store.dispatch>();
+  const dispatch = useAppDispatch();
   const todos = useSelector((state: RootState) => state.todos.todos);
   const [isDone, setIsDone] = useState<boolean>(false);
 
