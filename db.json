@@ -1,10 +1,10 @@
 {
   "todos": [
     {
-      "id": 1,
-      "title": "json-server",
-      "content": "typicode",
-      "isDone": "false"
+      "id": "4987c40b-d171-4012-b980-c5866e4a9735",
+      "title": "ㅁㄴㅇ",
+      "content": "ㅁㄴㅇ",
+      "isDone": true
     }
   ]
 }

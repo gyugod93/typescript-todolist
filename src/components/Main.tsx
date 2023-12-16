@@ -2,18 +2,18 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import { RootState } from "../types/rootReducer";
-import { changeTodo, deleteTodo } from "../redux/modules/todosSlice";
 import jsonServerAPI from "../api/api";
+import store from "../redux/config/rootStore";
+import { __changeTodo, __deleteTodo } from "../redux/modules/todosSlice";
 
 const Main = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<typeof store.dispatch>();
   const todos = useSelector((state: RootState) => state.todos.todos);
   const [isDone, setIsDone] = useState<boolean>(false);
 
   const deleteTodoHandler = async (id: string) => {
     try {
-      await jsonServerAPI.delete(`/todos/${id}`);
-      dispatch(deleteTodo({ id }));
+      dispatch(__deleteTodo({ id }));
     } catch (error) {
       console.log("error", error);
     }
@@ -28,7 +28,7 @@ const Main = () => {
         isDone: changeIsDone,
       });
 
-      dispatch(changeTodo({ id }));
+      dispatch(__changeTodo({ id, isDone: changeIsDone }));
     } catch (error) {}
   };
 
@@ -39,7 +39,7 @@ const Main = () => {
         {todos
           .filter((todo) => todo.isDone === isDone)
           .map((todo) => (
-            <StTodos>
+            <StTodos key={todo.id}>
               <div>{todo.title}</div>
               <div>{todo.content}</div>
               <StBtn>
@@ -54,7 +54,7 @@ const Main = () => {
         {todos
           .filter((todo) => todo.isDone)
           .map((todo) => (
-            <StTodos>
+            <StTodos key={todo.id}>
               <div>{todo.title}</div>
               <div>{todo.content}</div>
               <StBtn>
@@ -86,7 +86,7 @@ const StTodos = styled.div`
   margin-left: 20px;
 `;
 
-const StBtn = styled.button`
+const StBtn = styled.div`
   display: flex;
   border: 0px;
   background-color: transparent;

@@ -15,10 +15,13 @@ export type DeleteTodoPayload = {
 
 export type ChangeTodoPayload = {
   id: string;
+  isDone: boolean;
 };
 
 export type TodosState = {
   todos: TodoType[];
+  isLoading: boolean;
+  error: Error | null;
 };
 
 export type TodosAction =
