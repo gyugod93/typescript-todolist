@@ -1,20 +1,37 @@
-import React, { useState } from "react";
-import { TodoType } from "..";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
+import jsonServerAPI from "../api/api";
+import { __changeTodo, __deleteTodo } from "../redux/modules/todosSlice";
+import { RootState } from "../types/types";
+import { useAppDispatch } from "../redux/hooks/hooks";
 
-type MainProps = {
-  todos: TodoType[];
-  deleteTodoHandler: (id: string) => void;
-  isDone: boolean;
-  changeTodoIsDoneHandler: (id: string) => void;
-};
+const Main = () => {
+  const dispatch = useAppDispatch();
+  const todos = useSelector((state: RootState) => state.todos.todos);
+  const [isDone, setIsDone] = useState<boolean>(false);
 
-const Main: React.FC<MainProps> = ({
-  todos,
-  deleteTodoHandler,
-  isDone,
-  changeTodoIsDoneHandler,
-}) => {
+  const deleteTodoHandler = async (id: string) => {
+    try {
+      dispatch(__deleteTodo({ id }));
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+  const changeTodoHandler = async (id: string) => {
+    try {
+      const findTodo = todos.find((todo) => todo.id === id);
+      const changeIsDone = !findTodo?.isDone;
+
+      await jsonServerAPI.patch(`/todos/${id}`, {
+        isDone: changeIsDone,
+      });
+
+      dispatch(__changeTodo({ id, isDone: changeIsDone }));
+    } catch (error) {}
+  };
+
   return (
     <>
       <h2>Working</h2>
@@ -26,9 +43,7 @@ const Main: React.FC<MainProps> = ({
               <div>{todo.title}</div>
               <div>{todo.content}</div>
               <StBtn>
-                <button onClick={() => changeTodoIsDoneHandler(todo.id)}>
-                  완료
-                </button>
+                <button onClick={() => changeTodoHandler(todo.id)}>완료</button>
                 <button onClick={() => deleteTodoHandler(todo.id)}>삭제</button>
               </StBtn>
             </StTodos>
@@ -43,9 +58,7 @@ const Main: React.FC<MainProps> = ({
               <div>{todo.title}</div>
               <div>{todo.content}</div>
               <StBtn>
-                <button onClick={() => changeTodoIsDoneHandler(todo.id)}>
-                  취소
-                </button>
+                <button onClick={() => changeTodoHandler(todo.id)}>취소</button>
                 <button onClick={() => deleteTodoHandler(todo.id)}>삭제</button>
               </StBtn>
             </StTodos>
@@ -67,12 +80,13 @@ const StTodos = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
+  padding: 10px;
   width: 200px;
   height: 200px;
   margin-left: 20px;
 `;
 
-const StBtn = styled.button`
+const StBtn = styled.div`
   display: flex;
   border: 0px;
   background-color: transparent;
