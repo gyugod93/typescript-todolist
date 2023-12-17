@@ -1,65 +1,88 @@
-import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
-import jsonServerAPI from "../api/api";
-import { __changeTodo, __deleteTodo } from "../redux/modules/todosSlice";
-import { RootState } from "../types/types";
-import { useAppDispatch } from "../redux/hooks/hooks";
+import { changeTodo, deleteTodo, getTodos } from "../api/api";
+import {
+  QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "react-query";
 
 const Main = () => {
-  const dispatch = useAppDispatch();
-  const todos = useSelector((state: RootState) => state.todos.todos);
   const [isDone, setIsDone] = useState<boolean>(false);
 
+  const queryClient = useQueryClient();
+  const { isFetching, isLoading, isError, data } = useQuery("todos", getTodos, {
+    retry: 5,
+    staleTime: 1000,
+  });
+
+  const deleteMutation = useMutation((id: string) => deleteTodo(id), {
+    onSuccess: () => {
+      queryClient.invalidateQueries("todos");
+    },
+  });
+
+  const changeMutation = useMutation(changeTodo, {
+    onSuccess: () => {
+      queryClient.invalidateQueries("todos");
+    },
+  });
+
   const deleteTodoHandler = async (id: string) => {
-    try {
-      dispatch(__deleteTodo({ id }));
-    } catch (error) {
-      console.log("error", error);
+    const findDeleteTodo = data?.find((todo) => todo.id === id);
+    if (findDeleteTodo) {
+      deleteMutation.mutate(findDeleteTodo.id);
     }
   };
 
   const changeTodoHandler = async (id: string) => {
-    try {
-      const findTodo = todos.find((todo) => todo.id === id);
-      const changeIsDone = !findTodo?.isDone;
-
-      await jsonServerAPI.patch(`/todos/${id}`, {
-        isDone: changeIsDone,
-      });
-
-      dispatch(__changeTodo({ id, isDone: changeIsDone }));
-    } catch (error) {}
+    const findDeleteTodo = data?.find((todo) => todo.id === id);
+    if (findDeleteTodo) {
+      const payload = {
+        id: findDeleteTodo.id,
+        isDone: !findDeleteTodo.isDone,
+      };
+      changeMutation.mutate(payload);
+    }
   };
+
+  if (isLoading) {
+    return <p>로딩중입니다..!</p>;
+  }
+
+  if (isError) {
+    return <p>오류가 발생하였습니다...!</p>;
+  }
 
   return (
     <>
       <h2>Working</h2>
       <StTodoList>
-        {todos
-          .filter((todo) => todo.isDone === isDone)
-          .map((todo) => (
-            <StTodos key={todo.id}>
-              <div>{todo.title}</div>
-              <div>{todo.content}</div>
+        {data
+          ?.filter((item) => item.isDone === isDone)
+          .map((item) => (
+            <StTodos key={item.id}>
+              <div>{item.title}</div>
+              <div>{item.content}</div>
               <StBtn>
-                <button onClick={() => changeTodoHandler(todo.id)}>완료</button>
-                <button onClick={() => deleteTodoHandler(todo.id)}>삭제</button>
+                <button onClick={() => changeTodoHandler(item.id)}>완료</button>
+                <button onClick={() => deleteTodoHandler(item.id)}>삭제</button>
               </StBtn>
             </StTodos>
           ))}
       </StTodoList>
       <h2>Done</h2>
       <StTodoList>
-        {todos
-          .filter((todo) => todo.isDone)
-          .map((todo) => (
-            <StTodos key={todo.id}>
-              <div>{todo.title}</div>
-              <div>{todo.content}</div>
+        {data
+          ?.filter((item) => item.isDone)
+          .map((item) => (
+            <StTodos key={item.id}>
+              <div>{item.title}</div>
+              <div>{item.content}</div>
               <StBtn>
-                <button onClick={() => changeTodoHandler(todo.id)}>취소</button>
-                <button onClick={() => deleteTodoHandler(todo.id)}>삭제</button>
+                <button onClick={() => changeTodoHandler(item.id)}>취소</button>
+                <button onClick={() => deleteTodoHandler(item.id)}>삭제</button>
               </StBtn>
             </StTodos>
           ))}
